@@ -1,6 +1,4 @@
 package com.barbershop.queue.entity;
-
-
 import com.barbershop.queue.enums.QueueStatus;
 import jakarta.persistence.*;
 import lombok.*;

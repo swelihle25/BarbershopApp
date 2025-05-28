@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = false)
 public class Service {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
