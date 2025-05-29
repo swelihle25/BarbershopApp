@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-//@Service
+@org.springframework.stereotype.Service
 public class QueueService {
 
     @Autowired
@@ -175,27 +175,28 @@ public class QueueService {
     }
 
     public List<Object[]> getPopularServicesStats(String shopLocation, LocalDate date) {
-        return queueEntryRepository.getPopularServicesByDate(shopLocation, date);
+//        return queueEntryRepository.getPopularServicesByDate(shopLocation, date);
+        return null;
+    }
+
+    public List<Object[]> getStaffPerformanceStats(String shopLocation, LocalDate date) {
+//        return queueEntryRepository.getStaffPerformanceByDate(shopLocation, date);
+        return null;
+    }
+
+    // Helper method to get queue position for customer
+    public Integer getCustomerQueuePosition(Long customerId, String shopLocation) {
+        Optional<QueueEntry> queueEntry = findCustomerInQueue(customerId, shopLocation);
+        if (queueEntry.isPresent()) {
+            return queueEntry.get().getQueuePosition();
+        }
+        return null;
+    }
+
+    // Helper method to get estimated wait time
+    public Integer getEstimatedWaitTime(String shopLocation, Integer position) {
+        // Simple calculation: average 30 minutes per customer
+        Integer customersAhead = getCustomersAheadCount(shopLocation, position);
+        return customersAhead * 30; // 30 minutes per customer
     }
 }
-//
-//    public List<Object[]> getStaffPerformanceStats(String shopLocation, LocalDate date) {
-//        return queueEntryRepository.getStaffPerformanceByDate(shopLocation, date);
-//    }
-//
-//    // Helper method to get queue position for customer
-//    public Integer getCustomerQueuePosition(Long customerId, String shopLocation) {
-//        Optional<QueueEntry> queueEntry = findCustomerInQueue(customerId, shopLocation);
-//        if (queueEntry.isPresent()) {
-//            return queueEntry.get().getQueuePosition();
-//        }
-//        return null;
-//    }
-//
-//    // Helper method to get estimated wait time
-//    public Integer getEstimatedWaitTime(String shopLocation, Integer position) {
-//        // Simple calculation: average 30 minutes per customer
-//        Integer customersAhead = getCustomersAheadCount(shopLocation, position);
-//        return customersAhead * 30; // 30 minutes per customer
-//    }
-//}
