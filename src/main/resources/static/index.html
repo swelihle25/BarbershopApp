@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kings Barbershop - Queue Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .shop-selector {
+            margin: 10px 0;
+        }
+
+        .shop-selector select {
+            padding: 10px 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255,255,255,0.9);
+            color: #2c3e50;
+            cursor: pointer;
+            min-width: 200px;
+        }
+
+        .shop-selector select option {
+            background: white;
+            color: #2c3e50;
+            padding: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .add-customer {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .add-customer h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .stats {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .queue-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .queue-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .queue-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 5px;
+        }
+
+        .queue-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .queue-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .customer-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .customer-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .customer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .customer-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .queue-position {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .customer-details {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .customer-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .customer-actions .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .empty-queue {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 40px 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c66;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #fcc;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #6c6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #cfc;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .customer-actions {
+                flex-direction: column;
+            }
+
+            .customer-actions .btn {
+                min-width: auto;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .queue-tabs {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            body {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+
+            .customer-card {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>👑 Kings Barbershop</h1>
+        <p>Queue Management System</p>
+        <div class="shop-selector">
+            <select id="shopSelect">
+                <option value="">Select Shop Location</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="sidebar">
+            <div class="add-customer">
+                <h3>Add New Customer</h3>
+                <div id="messages"></div>
+                <form id="addCustomerForm">
+                    <div class="form-group">
+                        <label for="customerName">Customer Name</label>
+                        <input type="text" id="customerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerPhone">Phone Number</label>
+                        <input type="tel" id="customerPhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="customerEmail">Email (Optional)</label>
+                        <input type="email" id="customerEmail">
+                    </div>
+                    <div class="form-group">
+                        <label for="serviceType">Service Type</label>
+                        <select id="serviceType" required>
+                            <option value="">Select Service</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add to Queue</button>
+                </form>
+            </div>
+
+            <div class="stats">
+                <h3>Today's Stats</h3>
+                <div class="stat-item">
+                    <span>Customers Waiting</span>
+                    <span class="stat-value" id="waitingCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Customers Served</span>
+                    <span class="stat-value" id="servedCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Average Wait Time</span>
+                    <span class="stat-value" id="avgWaitTime">0 min</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="queue-section">
+            <h2>Customer Queue</h2>
+
+            <div class="queue-tabs">
+                <div class="queue-tab active" data-status="WAITING">Waiting</div>
+                <div class="queue-tab" data-status="IN_PROGRESS">In Service</div>
+                <div class="queue-tab" data-status="COMPLETED">Completed</div>
+            </div>
+
+            <div id="queueContainer">
+                <div class="loading">Select a shop location to view queue</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuration - Update these to match your Spring Boot API endpoints
+    const API_BASE_URL = 'http://localhost:8081/barbershop-api/api';
+
+    // Global state
+    let currentShop = null;
+    let currentStatus = 'WAITING';
+    let queueEntries = [];
+    let shops = [];
+    let services = [];
+
+    // Initialize application
+    document.addEventListener('DOMContentLoaded', function() {
+        loadShops();
+        loadServices();
+        setupEventListeners();
+        // Load data every 30 seconds
+        setInterval(() => {
+            if (currentShop) {
+                loadQueue();
+                loadStats();
+            }
+        }, 30000);
+    });
+
+    // Show messages to user
+    function showMessage(message, type = 'error') {
+        const messagesDiv = document.getElementById('messages');
+        messagesDiv.innerHTML = `<div class="${type}-message">${message}</div>`;
+        setTimeout(() => {
+            messagesDiv.innerHTML = '';
+        }, 5000);
+    }
+
+    // Load shops from API
+    async function loadShops() {
+        try {
+            console.log('Loading shops from:', `${API_BASE_URL}/shops`);
+            const response = await fetch(`${API_BASE_URL}/shops`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            shops = await response.json();
+            console.log('Loaded shops:', shops);
+
+            const shopSelect = document.getElementById('shopSelect');
+            shopSelect.innerHTML = '<option value="">Select Shop Location</option>';
+
+            shops.forEach(shop => {
+                const option = document.createElement('option');
+                option.value = shop.name; // Use name as value for location parameter
+                option.textContent = shop.name;
+                shopSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading shops:', error);
+            showMessage('Error loading shop locations. Please check if the server is running.');
+        }
+    }
+
+    // Load services from API
+    async function loadServices() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/services`);
+            if (response.ok) {
+                services = await response.json();
+                const serviceSelect = document.getElementById('serviceType');
+                serviceSelect.innerHTML = '<option value="">Select Service</option>';
+
+                services.forEach(service => {
+                    const option = document.createElement('option');
+                    option.value = service.id;
+                    option.textContent = `${service.name} - $${service.price}`;
+                    serviceSelect.appendChild(option);
+                });
+            } else {
+                // Fallback hardcoded services if API not available
+                console.log('Using fallback services');
+                const serviceSelect = document.getElementById('serviceType');
+                serviceSelect.innerHTML = `
+                    <option value="">Select Service</option>
+                    <option value="1">Haircut - R25</option>
+                    <option value="2">Shave - R15</option>
+                    <option value="3">Haircut + Shave - R35</option>
+                    <option value="4">Beard Trim - R20</option>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading services:', error);
+            // Use fallback
+            const serviceSelect = document.getElementById('serviceType');
+            serviceSelect.innerHTML = `
+                <option value="">Select Service</option>
+                <option value="1">Haircut - $25</option>
+                <option value="2">Shave - $15</option>
+                <option value="3">Haircut + Shave - $35</option>
+                <option value="4">Beard Trim - $20</option>
+            `;
+        }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        // Shop selection
+        document.getElementById('shopSelect').addEventListener('change', function(e) {
+            currentShop = e.target.value;
+            console.log('Selected shop:', currentShop);
+            if (currentShop) {
+                loadQueue();
+                loadStats();
+            } else {
+                document.getElementById('queueContainer').innerHTML = '<div class="loading">Select a shop location to view queue</div>';
+            }
+        });
+
+        // Add customer form
+        document.getElementById('addCustomerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            addCustomerToQueue();
+        });
+
+        // Queue tabs
+        document.querySelectorAll('.queue-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.queue-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentStatus = this.dataset.status;
+                renderQueue();
+            });
+        });
+    }
+
+    // Add new customer to queue
+    async function addCustomerToQueue() {
+        if (!currentShop) {
+            showMessage('Please select a shop first');
+            return;
+        }
+
+        const customerName = document.getElementById('customerName').value.trim();
+        const customerPhone = document.getElementById('customerPhone').value.trim();
+        const customerEmail = document.getElementById('customerEmail').value.trim();
+        const serviceId = document.getElementById('serviceType').value;
+
+        if (!customerName || !serviceId) {
+            showMessage('Please fill in all required fields');
+            return;
+        }
+
+        try {
+            // First create the customer
+            const customerData = {
+                name: customerName,
+                phoneNumber: customerPhone,
+                email: customerEmail || ''
+            };
+
+            console.log('Creating customer:', customerData);
+            const customerResponse = await fetch(`${API_BASE_URL}/customers`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(customerData)
+            });
+
+            if (!customerResponse.ok) {
+                throw new Error(`Failed to create customer: ${customerResponse.status}`);
+            }
+
+            const customer = await customerResponse.json();
+            console.log('Customer created:', customer);
+
+            // Then add to queue using the correct endpoint
+            const queueUrl = `${API_BASE_URL}/queue/add?customerId=${customer.id}&serviceId=${serviceId}&shopLocation=${encodeURIComponent(currentShop)}`;
+            console.log('Adding to queue:', queueUrl);
+
+            const queueResponse = await fetch(queueUrl, {
+                method: 'POST'
+            });
+
+            if (!queueResponse.ok) {
+                throw new Error(`Failed to add to queue: ${queueResponse.status}`);
+            }
+
+            const queueEntry = await queueResponse.json();
+            console.log('Added to queue:', queueEntry);
+
+            // Clear form and reload data
+            document.getElementById('addCustomerForm').reset();
+            showMessage('Customer added to queue successfully!', 'success');
+            loadQueue();
+            loadStats();
+
+        } catch (error) {
+            console.error('Error adding customer to queue:', error);
+            showMessage(`Error adding customer: ${error.message}`);
+        }
+    }
+
+    // Load queue entries from API
+    async function loadQueue() {
+        if (!currentShop) return;
+
+        try {
+            console.log('Loading queue for shop:', currentShop);
+            const response = await fetch(`${API_BASE_URL}/queue/active/${encodeURIComponent(currentShop)}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            queueEntries = await response.json();
+            console.log('Loaded queue entries:', queueEntries);
+            renderQueue();
+        } catch (error) {
+            console.error('Error loading queue:', error);
+            document.getElementById('queueContainer').innerHTML = '<div class="empty-queue">Error loading queue</div>';
+        }
+    }
+
+    // Render queue entries based on current status
+    function renderQueue() {
+        const container = document.getElementById('queueContainer');
+        const filteredEntries = queueEntries.filter(entry => entry.status === currentStatus);
+
+        if (filteredEntries.length === 0) {
+            container.innerHTML = `<div class="empty-queue">No customers ${currentStatus.toLowerCase().replace('_', ' ')}</div>`;
+            return;
+        }
+
+        container.innerHTML = filteredEntries.map((entry, index) => `
+            <div class="customer-card">
+                <div class="customer-header">
+                    <div class="customer-name">${entry.customer.name}</div>
+                    ${currentStatus === 'WAITING' ? `<div class="queue-position">#${entry.queuePosition}</div>` : ''}
+                </div>
+                <div class="customer-details">
+                    <strong>Service:</strong> ${entry.service.name}<br>
+                    ${entry.customer.phoneNumber ? `<strong>Phone:</strong> ${entry.customer.phoneNumber}<br>` : ''}
+                    <strong>Joined:</strong> ${new Date(entry.joinedAt).toLocaleTimeString()}<br>
+                    ${entry.serviceStartedAt ? `<strong>Started:</strong> ${new Date(entry.serviceStartedAt).toLocaleTimeString()}<br>` : ''}
+                    ${entry.serviceCompletedAt ? `<strong>Completed:</strong> ${new Date(entry.serviceCompletedAt).toLocaleTimeString()}` : ''}
+                </div>
+                <div class="customer-actions">
+                    ${getActionButtons(entry)}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Get action buttons based on queue entry status
+    function getActionButtons(entry) {
+        switch (entry.status) {
+            case 'WAITING':
+                return `
+                    <button class="btn btn-success" onclick="startService(${entry.id})">Start Service</button>
+                    <button class="btn btn-danger" onclick="removeFromQueue(${entry.id})">Remove</button>
+                `;
+            case 'IN_PROGRESS':
+                return `
+                    <button class="btn btn-primary" onclick="completeService(${entry.id})">Complete Service</button>
+                `;
+            case 'COMPLETED':
+                return `
+                    <button class="btn btn-danger" onclick="removeFromQueue(${entry.id})">Remove</button>
+                `;
+            default:
+                return '';
+        }
+    }
+
+    // Queue action functions
+    async function startService(queueEntryId) {
+        // For now, we'll use a default staff ID. In production, you'd select from available staff
+        const staffId = 1; // You might want to add staff selection UI
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/queue/${queueEntryId}/start?staffId=${staffId}`, {
+                method: 'PUT'
+            });
+
+            if (response.ok) {
+                loadQueue();
+                loadStats();
+                showMessage('Service started!', 'success');
+            } else {
+                throw new Error('Failed to start service');
+            }
+        } catch (error) {
+            console.error('Error starting service:', error);
+            showMessage('Error starting service');
+        }
+    }
+
+    async function completeService(queueEntryId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/queue/${queueEntryId}/complete`, {
+                method: 'PUT'
+            });
+
+            if (response.ok) {
+                loadQueue();
+                loadStats();
+                showMessage('Service completed!', 'success');
+            } else {
+                throw new Error('Failed to complete service');
+            }
+        } catch (error) {
+            console.error('Error completing service:', error);
+            showMessage('Error completing service');
+        }
+    }
+
+    async function removeFromQueue(queueEntryId) {
+        if (confirm('Are you sure you want to remove this customer from the queue?')) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/queue/${queueEntryId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    loadQueue();
+                    loadStats();
+                    showMessage('Customer removed from queue', 'success');
+                } else {
+                    throw new Error('Failed to remove customer');
+                }
+            } catch (error) {
+                console.error('Error removing customer:', error);
+                showMessage('Error removing customer');
+            }
+        }
+    }
+
+    // Load and display stats
+    async function loadStats() {
+        if (!currentShop) return;
+
+        try {
+            // Load waiting count
+            const waitingResponse = await fetch(`${API_BASE_URL}/queue/count/waiting/${encodeURIComponent(currentShop)}`);
+            const waitingCount = waitingResponse.ok ? await waitingResponse.json() : 0;
+
+            // Load served count for today
+            const servedResponse = await fetch(`${API_BASE_URL}/queue/report/customers-served/today/${encodeURIComponent(currentShop)}`);
+            const servedCount = servedResponse.ok ? await servedResponse.json() : 0;
+
+            // Load average wait time for today
+            const waitTimeResponse = await fetch(`${API_BASE_URL}/queue/report/wait-time/today/${encodeURIComponent(currentShop)}`);
+            const avgWaitTime = waitTimeResponse.ok ? await waitTimeResponse.json() : 0;
+
+            // Update UI
+            document.getElementById('waitingCount').textContent = waitingCount;
+            document.getElementById('servedCount').textContent = servedCount;
+            document.getElementById('avgWaitTime').textContent = `${Math.round(avgWaitTime)} min`;
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+</script>
+</body>
+</html>

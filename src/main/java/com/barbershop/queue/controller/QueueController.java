@@ -134,10 +134,10 @@ public class QueueController {
     @GetMapping("/position/customer/{customerId}/location/{location}")
     public ResponseEntity<Integer> getCustomerPosition(@PathVariable Long customerId,
                                                        @PathVariable String location) {
-//        Integer position = queueService.getCustomerQueuePosition(customerId, location);
-//        if (position != null) {
-//            return ResponseEntity.ok(position);
-//        }
+        Integer position = queueService.getCustomerQueuePosition(customerId, location);
+        if (position != null) {
+            return ResponseEntity.ok(position);
+        }
         return ResponseEntity.notFound().build();
     }
 
@@ -145,8 +145,8 @@ public class QueueController {
     @GetMapping("/wait-time/{location}")
     public ResponseEntity<Integer> getEstimatedWaitTime(@PathVariable String location,
                                                         @RequestParam Integer position) {
-//        Integer waitTime = queueService.getEstimatedWaitTime(location, position);
-        return ResponseEntity.ok(null);
+        Integer waitTime = queueService.getEstimatedWaitTime(location, position);
+        return ResponseEntity.ok(waitTime);
     }
 
     // Get current services by staff

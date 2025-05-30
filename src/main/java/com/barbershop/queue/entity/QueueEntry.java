@@ -1,5 +1,6 @@
 package com.barbershop.queue.entity;
 import com.barbershop.queue.enums.QueueStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,15 +20,18 @@ public class QueueEntry {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id", nullable = false)
+    @JsonIgnore
     private Service service;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_staff_id")
+    @JsonIgnore
     private Staff assignedStaff;
 
     @Column(name = "queue_position", nullable = false)

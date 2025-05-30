@@ -1,5 +1,4 @@
 package com.barbershop.queue.entity;
-
 import com.barbershop.queue.enums.PaymentMethod;
 import com.barbershop.queue.enums.PaymentStatus;
 import jakarta.persistence.*;
