@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @Repository
 public interface QueueEntryRepository extends JpaRepository<QueueEntry, Long> {
-
     // Find current active queue for a location
     @Query("SELECT q FROM QueueEntry q WHERE q.shopLocation = :location " +
             "AND q.status IN ('WAITING', 'IN_PROGRESS') ORDER BY q.queuePosition")

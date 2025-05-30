@@ -585,7 +585,7 @@
             const customer = await customerResponse.json();
             console.log('Customer created:', customer);
 
-            // Then add to queue using the correct endpoint
+            // Then add to queue
             const queueUrl = `${API_BASE_URL}/queue/add?customerId=${customer.id}&serviceId=${serviceId}&shopLocation=${encodeURIComponent(currentShop)}`;
             console.log('Adding to queue:', queueUrl);
 
@@ -637,6 +637,7 @@
     function renderQueue() {
         const container = document.getElementById('queueContainer');
         const filteredEntries = queueEntries.filter(entry => entry.status === currentStatus);
+        console.log('Filtered entries >>> ', filteredEntries);
 
         if (filteredEntries.length === 0) {
             container.innerHTML = `<div class="empty-queue">No customers ${currentStatus.toLowerCase().replace('_', ' ')}</div>`;
@@ -646,7 +647,7 @@
         container.innerHTML = filteredEntries.map((entry, index) => `
             <div class="customer-card">
                 <div class="customer-header">
-                    <div class="customer-name">${entry.customer.name}</div>
+                    <div class="customer-name">${entry.customer?.name || 'Unknown'}</div>
                     ${currentStatus === 'WAITING' ? `<div class="queue-position">#${entry.queuePosition}</div>` : ''}
                 </div>
                 <div class="customer-details">
