@@ -14,9 +14,13 @@ import java.util.Optional;
 public interface QueueEntryRepository extends JpaRepository<QueueEntry, Long> {
     // Find current active queue for a location
     @Query("SELECT q FROM QueueEntry q WHERE q.shopLocation = :location " +
-            "AND q.status IN ('WAITING', 'IN_PROGRESS') ORDER BY q.queuePosition")
+            "AND q.status IN ('WAITING', 'IN_PROGRESS', 'COMPLETED') ORDER BY q.queuePosition")
     List<QueueEntry> findActiveQueueByLocation(@Param("location") String location);
 
+    // Find truly active queue (only waiting and in progress)
+    @Query("SELECT q FROM QueueEntry q WHERE q.shopLocation = :location " +
+            "AND q.status IN ('WAITING', 'IN_PROGRESS') ORDER BY q.queuePosition")
+    List<QueueEntry> findTrulyActiveQueueByLocation(@Param("location") String location);
     // Find only waiting customers
     @Query("SELECT q FROM QueueEntry q WHERE q.shopLocation = :location " +
             "AND q.status = 'WAITING' ORDER BY q.queuePosition")
@@ -55,25 +59,10 @@ public interface QueueEntryRepository extends JpaRepository<QueueEntry, Long> {
             "WHERE q.shopLocation = :location AND DATE(q.joinedAt) = :date AND q.serviceStartedAt IS NOT NULL")
     Double getAverageWaitTimeByDate(@Param("location") String location, @Param("date") LocalDate date);
 
-    // Popular services query
-//    @Query("SELECT new com.barbershop.dto.ServiceStatsDTO(s.name, COUNT(q), SUM(s.price), " +
-//            "COUNT(q) * 100.0 / (SELECT COUNT(q2) FROM QueueEntry q2 WHERE q2.shopLocation = :location " +
-//            "AND DATE(q2.joinedAt) = :date)) " +
-//            "FROM QueueEntry q JOIN q.service s " +
-//            "WHERE q.shopLocation = :location AND DATE(q.joinedAt) = :date " +
-//            "GROUP BY s.id, s.name ORDER BY COUNT(q) DESC")
-//    List<Object[]> getPopularServicesByDate(@Param("location") String location, @Param("date") LocalDate date);
-
-    // Staff performance query
-//    @Query("SELECT new com.barbershop.dto.StaffPerformanceDTO(st.name, COUNT(q), " +
-//            "AVG(TIMESTAMPDIFF(MINUTE, q.serviceStartedAt, q.serviceCompletedAt)), SUM(s.price)) " +
-//            "FROM QueueEntry q JOIN q.assignedStaff st JOIN q.service s " +
-//            "WHERE q.shopLocation = :location AND DATE(q.serviceCompletedAt) = :date " +
-//            "AND q.status = 'COMPLETED' " +
-//            "GROUP BY st.id, st.name ORDER BY COUNT(q) DESC")
-//    List<Object[]> getStaffPerformanceByDate(@Param("location") String location, @Param("date") LocalDate date);
-
     // Find entries by staff member
     @Query("SELECT q FROM QueueEntry q WHERE q.assignedStaff.id = :staffId AND q.status = 'IN_PROGRESS'")
     List<QueueEntry> findCurrentServicesByStaff(@Param("staffId") Long staffId);
+
+
+
 }

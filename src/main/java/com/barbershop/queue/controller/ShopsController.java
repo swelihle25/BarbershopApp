@@ -18,8 +18,7 @@ public class ShopsController {
                 Map.of("id", "2", "name", "Cape Town"),
                 Map.of("id", "3", "name", "Mall of Africa"),
                 Map.of("id", "4", "name", "Cresta"),
-                Map.of("id", "5", "name", "Montana"),
-                Map.of("id", "6", "name", "Khayeh")
+                Map.of("id", "5", "name", "Montana")
 
 
         );

@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "queue_entries")
+//@Index(columnList = ("shopLocation"))
 @Data
 @Builder
 @NoArgsConstructor

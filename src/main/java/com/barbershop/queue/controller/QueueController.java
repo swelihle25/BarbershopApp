@@ -57,6 +57,13 @@ public class QueueController {
         }
         return ResponseEntity.notFound().build();
     }
+    // Get truly active queue for a location (only waiting and in progress)
+    @GetMapping("/truly-active/{location}")
+    public ResponseEntity<List<QueueEntry>> getTrulyActiveQueue(@PathVariable String location) {
+        List<QueueEntry> activeQueue = queueService.getTrulyActiveQueue(location);
+        return ResponseEntity.ok(activeQueue);
+    }
+
 
     // Add customer to queue
     @PostMapping("/add")

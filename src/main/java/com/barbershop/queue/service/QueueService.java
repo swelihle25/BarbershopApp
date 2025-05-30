@@ -47,6 +47,13 @@ public class QueueService {
         return queueEntryRepository.findActiveQueueByLocation(shopLocation);
     }
 
+    // Get only truly active queue (waiting + in progress)
+    public List<QueueEntry> getTrulyActiveQueue(String shopLocation) {
+        return queueEntryRepository.findTrulyActiveQueueByLocation(shopLocation);
+    }
+
+
+
     public List<QueueEntry> getWaitingCustomers(String shopLocation) {
         return queueEntryRepository.findWaitingEntriesByLocation(shopLocation);
     }
@@ -54,6 +61,7 @@ public class QueueService {
     public Optional<QueueEntry> getNextWaitingCustomer(String shopLocation) {
         return queueEntryRepository.findNextWaitingCustomer(shopLocation);
     }
+
 
     public QueueEntry addCustomerToQueue(Long customerId, Long serviceId, String shopLocation) {
         // Find customer

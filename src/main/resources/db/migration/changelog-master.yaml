@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: db/migration/V_1_changelog.sql
+  - include:
+      file: db/migration/V_2_changelog.sql
+  - include:
+      file: db/migration/V_3_paymentschangelog.sql
