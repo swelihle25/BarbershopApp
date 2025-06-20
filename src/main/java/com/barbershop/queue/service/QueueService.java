@@ -5,13 +5,19 @@ import com.barbershop.queue.entity.Service;
 import com.barbershop.queue.entity.Staff;
 import com.barbershop.queue.enums.QueueStatus;
 import com.barbershop.queue.repository.QueueEntryRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @org.springframework.stereotype.Service
+@Slf4j
 public class QueueService {
 
     @Autowired
@@ -42,17 +48,14 @@ public class QueueService {
         queueEntryRepository.deleteById(id);
     }
 
-    // Queue management methods
+    // Real-Time Queue management methods
     public List<QueueEntry> getActiveQueue(String shopLocation) {
         return queueEntryRepository.findActiveQueueByLocation(shopLocation);
     }
 
-    // Get only truly active queue (waiting + in progress)
     public List<QueueEntry> getTrulyActiveQueue(String shopLocation) {
         return queueEntryRepository.findTrulyActiveQueueByLocation(shopLocation);
     }
-
-
 
     public List<QueueEntry> getWaitingCustomers(String shopLocation) {
         return queueEntryRepository.findWaitingEntriesByLocation(shopLocation);
@@ -62,9 +65,11 @@ public class QueueService {
         return queueEntryRepository.findNextWaitingCustomer(shopLocation);
     }
 
-
+    @CacheEvict(value = "queue-stats", allEntries = true)
+    @Transactional
     public QueueEntry addCustomerToQueue(Long customerId, Long serviceId, String shopLocation) {
-        // Find customer
+        log.info("Adding customer {} to queue at {} and clearing queue stats cache", customerId, shopLocation);
+
         Customer customer = customerService.getCustomerById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found with id: " + customerId));
 
@@ -97,7 +102,11 @@ public class QueueService {
         return queueEntryRepository.save(queueEntry);
     }
 
+    @CacheEvict(value = "queue-stats", allEntries = true)
+    @Transactional
     public QueueEntry startService(Long queueEntryId, Long staffId) {
+        log.info("Starting service for queue entry {} and clearing queue stats cache", queueEntryId);
+
         // Find queue entry
         QueueEntry queueEntry = queueEntryRepository.findById(queueEntryId)
                 .orElseThrow(() -> new RuntimeException("Queue entry not found with id: " + queueEntryId));
@@ -119,7 +128,11 @@ public class QueueService {
         return queueEntryRepository.save(queueEntry);
     }
 
+    @CacheEvict(value = "queue-stats", allEntries = true)
+    @Transactional
     public QueueEntry completeService(Long queueEntryId) {
+        log.info("Completing service for queue entry {} and clearing queue stats cache", queueEntryId);
+
         // Find queue entry
         QueueEntry queueEntry = queueEntryRepository.findById(queueEntryId)
                 .orElseThrow(() -> new RuntimeException("Queue entry not found with id: " + queueEntryId));
@@ -136,7 +149,10 @@ public class QueueService {
         return queueEntryRepository.save(queueEntry);
     }
 
+    @CacheEvict(value = "queue-stats", allEntries = true)
+    @Transactional
     public void removeFromQueue(Long queueEntryId) {
+        log.info("Removing queue entry {} and clearing queue stats cache", queueEntryId);
         // Check if queue entry exists
         QueueEntry queueEntry = queueEntryRepository.findById(queueEntryId)
                 .orElseThrow(() -> new RuntimeException("Queue entry not found with id: " + queueEntryId));
@@ -144,10 +160,13 @@ public class QueueService {
         queueEntryRepository.deleteById(queueEntryId);
     }
 
-    // Queue information methods
+
+    @Cacheable(value = "queue-stats", key = "'waiting_count_' + #shopLocation")
     public Integer getWaitingCustomersCount(String shopLocation) {
+        log.info("Fetching waiting customers count for location: {}", shopLocation);
         return queueEntryRepository.countWaitingCustomers(shopLocation);
     }
+
 
     public Integer getCustomersAheadCount(String shopLocation, Integer position) {
         return queueEntryRepository.countCustomersAhead(shopLocation, position);
@@ -164,14 +183,19 @@ public class QueueService {
     }
 
     // Reporting methods
+    @Cacheable(value = "queue-stats", key = "'served_today_' + #shopLocation")
     public Integer getCustomersServedToday(String shopLocation) {
+        log.info("Fetching customers served today for location: {}", shopLocation);
         LocalDate today = LocalDate.now();
         return queueEntryRepository.countCustomersServedByDate(shopLocation, today);
     }
 
+    @Cacheable(value = "queue-stats", key = "'served_' + #shopLocation + '_' + #date")
     public Integer getCustomersServedByDate(String shopLocation, LocalDate date) {
+        log.info("Fetching customers served on {} for location: {}", date, shopLocation);
         return queueEntryRepository.countCustomersServedByDate(shopLocation, date);
     }
+
 
     public Double getAverageWaitTimeToday(String shopLocation) {
         LocalDate today = LocalDate.now();

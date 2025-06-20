@@ -1,5 +1,4 @@
 services:
-
   postgres:
     image: postgres:15
     container_name: postgres
@@ -14,22 +13,41 @@ services:
     networks:
       - barbershop-net
 
+  redis:
+    image: redis:7-alpine
+    container_name: barbershop-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - barbershop-net
+
   app:
     build: .
     container_name: barbershop-app
-    depends_on:
-      - postgres
     ports:
       - "8081:8081"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/barbershopdb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_CACHE_TYPE: redis
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/migration/changelog-master.yaml
+
+    depends_on:
+      - postgres
+      - redis
     networks:
       - barbershop-net
 
 volumes:
   pgdata:
+  redis_data:
 
 networks:
   barbershop-net:
+    driver: bridge
